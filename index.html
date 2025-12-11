@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সাধারণ জ্ঞান ২০২৫ - ফ্লিপ কার্ড</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Hind Siliguri for Bengali -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f0f9ff;
+            background-image: radial-gradient(#e0f2fe 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        /* 3D Flip Animation Utilities */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        .backface-hidden {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="book-open" class="text-blue-600 w-6 h-6"></i>
+                <h1 class="text-xl font-bold text-slate-800 tracking-wide">জিকে ২০২৫</h1>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="resetCards()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">রিসেট</span>
+                </button>
+                <button onclick="shuffleAndRender()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">
+                    <i data-lucide="shuffle" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">এলোমেলো করুন</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Progress Info -->
+            <div class="mb-6 flex justify-between items-center text-sm text-slate-500">
+                <p>কার্ডে ক্লিক করে উত্তর দেখুন</p>
+                <p id="card-count">মোট প্রশ্ন: 0</p>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Cards will be injected here by JS -->
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
+            <p>© ২০২৫ সাধারণ জ্ঞান প্রস্তুতি</p>
+        </div>
+    </footer>
+
+    <script>
+        // Data Source
+        const qaData = [
+            { q: "২০২৫ সালে ক্রীড়াক্ষেত্রে বিশেষ অবদানের জন্য কে বেগম রোকেয়া পদক পেয়েছেন?", a: "ঋতুপর্ণা চাকমা", category: "পুরস্কার", color: "bg-purple-100 text-purple-700" },
+            { q: "নারীর উন্নতিতে অবদান রাখার জন্য ২০২৫ সালে মোট কতজনকে বেগম রোকেয়া পদক দেওয়া হয়েছে?", a: "৪ জন", category: "পুরস্কার", color: "bg-purple-100 text-purple-700" },
+            { q: "হিউম্যান রাইটস টিউলিপ পুরস্কার ২০২৫-এর জন্য কোন বাংলাদেশি মনোনীত হয়েছেন?", a: "সাঞ্জিদা ইসলাম তুলি", category: "পুরস্কার", color: "bg-purple-100 text-purple-700" },
+            { q: "ফিফা শান্তি পুরস্কার ২০২৫ কাকে দেওয়া হয়েছে?", a: "ডোনাল্ড ট্রাম্প (যুক্তরাষ্ট্র)", category: "পুরস্কার", color: "bg-purple-100 text-purple-700" },
+            { q: "২০২৫ সালের নোবেল শান্তি পুরস্কার বিজয়ী কে?", a: "মারিয়া করিনা মাসাদো (ভেনেজুয়েলা)", category: "পুরস্কার", color: "bg-purple-100 text-purple-700" },
+            
+            { q: "জাতীয়ভাবে বেগম রোকেয়া দিবস কবে পালিত হয়?", a: "৯ ডিসেম্বর", category: "দিবস", color: "bg-orange-100 text-orange-700" },
+            { q: "আন্তর্জাতিক দুর্নীতিবিরোধী দিবস কবে?", a: "৯ ডিসেম্বর", category: "দিবস", color: "bg-orange-100 text-orange-700" },
+            { q: "আন্তর্জাতিক বেসামরিক বিমান চলাচল দিবস কবে?", a: "৭ ডিসেম্বর", category: "দিবস", color: "bg-orange-100 text-orange-700" },
+            
+            { q: "কোন শাড়ি ইউনেস্কোর অধরা সাংস্কৃতিক ঐতিহ্যের জন্য মনোনীত হয়েছে?", a: "টাঙ্গাইল শাড়ি", category: "বাংলাদেশ", color: "bg-green-100 text-green-700" },
+            { q: "অর্থনৈতিক সমীক্ষা ২০২৫ অনুসারে জনসংখ্যা বৃদ্ধির হার কত?", a: "১.১২ শতাংশ", category: "বাংলাদেশ", color: "bg-green-100 text-green-700" },
+            { q: "ILO-র সব মৌলিক কনভেনশন অনুমোদনকারী প্রথম দক্ষিণ এশীয় দেশ কোনটি?", a: "বাংলাদেশ", category: "বাংলাদেশ", color: "bg-green-100 text-green-700" },
+            { q: "মাছ উৎপাদনে বাংলাদেশের শীর্ষ জেলা কোনটি?", a: "ময়মনসিংহ", category: "বাংলাদেশ", color: "bg-green-100 text-green-700" },
+            { q: "নতুন ৫০০ টাকার নোটের পেছনে কিসের ছবি আছে?", a: "বাংলাদেশ সুপ্রিম কোর্ট", category: "বাংলাদেশ", color: "bg-green-100 text-green-700" },
+            { q: "অন্তর্বর্তী সরকার গঠন ও শপথ বৈধ বলে রায় দেওয়া হয় কবে?", a: "৪ ডিসেম্বর ২০২৫", category: "বাংলাদেশ", color: "bg-green-100 text-green-700" },
+
+            { q: "২০৩০ সালে সর্ববৃহৎ ভোক্তা বাজারে পরিণত হবে কোন দেশ?", a: "চীন", category: "আন্তর্জাতিক", color: "bg-blue-100 text-blue-700" },
+            { q: "সিরিয়াকে সন্ত্রাসবাদী তালিকা থেকে বাদ দিয়েছে কোন দেশ?", a: "কানাডা", category: "আন্তর্জাতিক", color: "bg-blue-100 text-blue-700" },
+            { q: "১৬ বছরের নিচে সোশ্যাল মিডিয়া নিষিদ্ধ করেছে কোন দেশ?", a: "অস্ট্রেলিয়া", category: "আন্তর্জাতিক", color: "bg-blue-100 text-blue-700" },
+            { q: "বর্তমানে আফিম উৎপাদনে শীর্ষ দেশ কোনটি?", a: "মিয়ানমার", category: "আন্তর্জাতিক", color: "bg-blue-100 text-blue-700" },
+            { q: "বিশ্বের সবচেয়ে গভীর ও দীর্ঘ সাগরতলে সড়কপথ নির্মাণ করেছে কে?", a: "নরওয়ে", category: "আন্তর্জাতিক", color: "bg-blue-100 text-blue-700" },
+
+            { q: "২০২৬ বিশ্বকাপ ফুটবলের উদ্বোধনী ম্যাচ কাদের মধ্যে হবে?", a: "মেক্সিকো ও দক্ষিণ আফ্রিকা", category: "খেলাধুলা", color: "bg-rose-100 text-rose-700" },
+            { q: "জুনিয়র হকি বিশ্বকাপে চ্যালেঞ্জার ট্রফি জিতেছে কে?", a: "বাংলাদেশ", category: "খেলাধুলা", color: "bg-rose-100 text-rose-700" },
+            { q: "এমএলএস (MLS) কাপ ২০২৫ চ্যাম্পিয়ন কোন ক্লাব?", a: "ইন্টার মায়ামি", category: "খেলাধুলা", color: "bg-rose-100 text-rose-700" },
+            { q: "টেস্ট ক্রিকেটে বাংলাদেশের সর্বোচ্চ উইকেট শিকারি কে?", a: "তাইজুল ইসলাম", category: "খেলাধুলা", color: "bg-rose-100 text-rose-700" },
+            { q: "২০,০০০ রানের মাইলফলক স্পর্শকারী চতুর্থ ভারতীয় কে?", a: "রোহিত শর্মা", category: "খেলাধুলা", color: "bg-rose-100 text-rose-700" },
+
+            { q: "কয়টি ব্যাংক একীভূত করে সম্মিলিত ইসলামী ব্যাংক পিএলসি হয়েছে?", a: "৫টি", category: "অর্থনীতি", color: "bg-yellow-100 text-yellow-700" },
+            { q: "২০২৫ সালে প্রবাসী আয়ে শীর্ষ ব্যাংক কোনটি?", a: "ইসলামী ব্যাংক", category: "অর্থনীতি", color: "bg-yellow-100 text-yellow-700" },
+            { q: "গত ৫ বছরে বাংলাদেশের বৈদেশিক ঋণ কত বেড়েছে?", a: "৪২ শতাংশ", category: "অর্থনীতি", color: "bg-yellow-100 text-yellow-700" },
+            
+            { q: "SSF-এর পূর্ণরূপ কী?", a: "Special Security Force", category: "বিবিধ", color: "bg-gray-100 text-gray-700" },
+            { q: "বিশ্বের সবচেয়ে বড় প্রাকৃতিক আখরোট বন কোথায়?", a: "কিরগিজস্তান", category: "বিবিধ", color: "bg-gray-100 text-gray-700" },
+        ];
+
+        let currentCards = [...qaData];
+        const container = document.getElementById('cards-container');
+        const countLabel = document.getElementById('card-count');
+
+        // Create Card HTML
+        function createCard(item) {
+            const cardWrapper = document.createElement('div');
+            cardWrapper.className = 'card group h-64 w-full perspective-1000 cursor-pointer';
+            
+            cardWrapper.innerHTML = `
+                <div class="card-inner relative w-full h-full transform-style-3d shadow-lg rounded-2xl">
+                    <!-- Front -->
+                    <div class="absolute w-full h-full backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center border-2 border-transparent group-hover:border-blue-200 transition-all">
+                        <span class="absolute top-4 right-4 text-xs font-semibold px-2 py-1 rounded-full ${item.color}">${item.category}</span>
+                        <div class="mb-4 text-blue-500">
+                             <i data-lucide="help-circle" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-slate-800 leading-snug">${item.q}</h3>
+                        <p class="absolute bottom-4 text-xs text-slate-400">উত্তর দেখতে ক্লিক করুন</p>
+                    </div>
+
+                    <!-- Back -->
+                    <div class="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                        <div class="mb-3 text-white/80">
+                            <i data-lucide="check-circle" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white leading-relaxed">${item.a}</h3>
+                         <p class="absolute bottom-4 text-xs text-blue-200">ফিরতে ক্লিক করুন</p>
+                    </div>
+                </div>
+            `;
+
+            // Add Click Event
+            cardWrapper.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+            });
+
+            return cardWrapper;
+        }
+
+        // Render Cards
+        function renderCards() {
+            container.innerHTML = '';
+            currentCards.forEach(item => {
+                container.appendChild(createCard(item));
+            });
+            countLabel.textContent = `মোট প্রশ্ন: ${currentCards.length}`;
+            lucide.createIcons();
+        }
+
+        // Shuffle Function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function shuffleAndRender() {
+            shuffleArray(currentCards);
+            renderCards();
+        }
+
+        function resetCards() {
+            // Unflip all first
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('flipped'));
+            // Wait a small moment then re-render original order
+            setTimeout(() => {
+                currentCards = [...qaData];
+                renderCards();
+            }, 300);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+        });
+
+    </script>
+</body>
+</html>
